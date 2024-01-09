@@ -1,6 +1,4 @@
-# Zero1_PosPayCash
+# Zero1_PosSplitPayments
 
 TODO:
-- [x] Tidy up code
-- [ ] Styling up checkout
-- [x] Format currency of cash tendered correctly
+- [ ] Something
