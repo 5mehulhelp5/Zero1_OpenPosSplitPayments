@@ -1,0 +1,16 @@
+<?php
+/**
+ * @var $block \Zero1\OpenPosSplitPayments\Block\Info\SplitPayments
+ */
+$paymentTitle = $block->getMethod()->getConfigData('title', $block->getInfo()->getOrder()->getStoreId());
+$splitPaymentData = json_decode($block->getInfo()->getOrder()->getPayment()->getAdditionalInformation('split_payment_data'), true);
+?>
+<div class="order-payment-method-name"><?= 'OpenPOS Split Payment Breakdown' ?></div>
+<table class="data-table admin__table-secondary">
+    <?php foreach($splitPaymentData as $paymentMethod): ?>
+    <tr>
+            <th><?= $block->escapeHtml(__($paymentMethod['title'])) ?></th>
+            <td><?= $block->escapeHtml(__($paymentMethod['amount'])) ?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>

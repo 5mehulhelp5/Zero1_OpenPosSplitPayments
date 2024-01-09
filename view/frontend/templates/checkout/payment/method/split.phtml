@@ -1,0 +1,18 @@
+<div id="openpos-split-payment">
+    <p>Available payment methods:</p>
+    <br>
+    <?php foreach($magewire->paymentMethods as $code => $paymentMethod): ?>
+        <?= $paymentMethod['title'] ?>
+        <input type="checkbox" id="<?=$code?>.in_use" wire:model.defer="paymentMethods.<?=$code?>.inUse">
+        <input type="text" id="<?=$code?>.amount" wire:model.defer="paymentMethods.<?=$code?>.amount">
+    <?php endforeach; ?>
+
+    <br>
+    <br>
+    <button wire:click="save">Apply payment split</button>
+    <br>
+    <br>
+    <p>Total remaining: <?= $magewire->getTotalRemaining() ?></p>
+    <span>Ignore outstanding balance</span><input type="checkbox" id="ignore_outstanding_balance" wire:model="ignoreOutstandingBalance">
+
+</div>

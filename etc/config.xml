@@ -1,0 +1,12 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/config.xsd">
+    <default>
+        <payment>
+            <openpos_split_payment>
+                <active>1</active>
+                <model>Zero1\OpenPosSplitPayments\Model\PaymentMethod</model>
+                <order_status>processing</order_status>
+                <title>OpenPOS Split Payment</title>
+            </openpos_split_payment>
+        </payment>
+    </default>
+</config>
