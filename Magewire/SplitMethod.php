@@ -8,7 +8,6 @@ use Magewirephp\Magewire\Component;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Pricing\Helper\Data as PricingHelper;
 use Magento\Payment\Helper\Data as PaymentHelper;
-
 use Hyva\Checkout\Model\Magewire\Component\EvaluationInterface;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationResultFactory;
 use Hyva\Checkout\Model\Magewire\Component\EvaluationResultInterface;
@@ -17,7 +16,9 @@ class SplitMethod extends Component implements EvaluationInterface
 {
     const OPENPOS_SPLIT_PAYMENT_METHOD_CODE = 'openpos_split_payment';
 
-    public $loader = 'Loading available payment methods...';
+    public $loader = [
+        'save' => 'Applying...'
+    ];
 
     public $listeners = [
         'save'
@@ -43,8 +44,14 @@ class SplitMethod extends Component implements EvaluationInterface
      */
     public $paymentMethods = [];
 
+    /**
+     * @var bool
+     */
     public $applied = false;
 
+    /**
+     * @var bool
+     */
     public $ignoreOutstandingBalance = false;
 
     /**
@@ -89,7 +96,6 @@ class SplitMethod extends Component implements EvaluationInterface
                 $this->paymentMethods[$code] = [
                     'code' => $code,
                     'title' => $paymentMethod['title'],
-                    'inUse' => false,
                     'amount' => 0
                 ];
             }
@@ -97,24 +103,17 @@ class SplitMethod extends Component implements EvaluationInterface
     }
 
     /**
-     * Save amount tendered to quote.
+     * Save payment method data to quote.
      *
      * @return void
      */
     public function save(): void
     {
         $this->applied = true;
-//
-//
-//        if($this->amountTendered && !is_numeric($this->amountTendered)) {
-//            $this->('Amount entered is not valid!');
-//            $this->amountTendered = 0;
-//            return;
-//        }
 
         $paymentData = [];
         foreach($this->paymentMethods as $code => $paymentMethod) {
-            if($paymentMethod['inUse']) {
+            if($paymentMethod['amount'] > 0) {
                 $paymentData[] = [
                     'title' => $paymentMethod['title'],
                     'amount' => $paymentMethod['amount']
@@ -127,18 +126,25 @@ class SplitMethod extends Component implements EvaluationInterface
         $this->checkoutSession->getQuote()->save();
     }
 
-    public function getTotalRemaining()
+    /**
+     * Return outstanding amount (quote grand total - all payment methods amounts)
+     *
+     * @return float|string
+     */
+    public function getTotalRemaining($formatted): float|string
     {
         $totalAmount = 0;
         foreach($this->paymentMethods as $paymentMethod) {
-            if($paymentMethod['inUse']) {
-                $totalAmount += $paymentMethod['amount'];
-            }
+            $totalAmount += $paymentMethod['amount'];
         }
 
-        return $this->pricingHelper->currency(($this->checkoutSession->getQuote()->getGrandTotal() - $totalAmount), true);
+        return $this->pricingHelper->currency(($this->checkoutSession->getQuote()->getGrandTotal() - $totalAmount), $formatted);
     }
 
+    /**
+     * @param EvaluationResultFactory $factory
+     * @return EvaluationResultInterface
+     */
     public function evaluateCompletion(EvaluationResultFactory $factory): EvaluationResultInterface
     {
         if(!$this->applied) {
@@ -148,17 +154,14 @@ class SplitMethod extends Component implements EvaluationInterface
         $methodInUse = false;
         $totalAmount = 0;
         foreach($this->paymentMethods as $paymentMethod) {
-            if($paymentMethod['inUse']) {
+            if($paymentMethod['amount'] > 0) {
                 $methodInUse = true;
                 $totalAmount += $paymentMethod['amount'];
-            }
-            if($paymentMethod['inUse'] && $paymentMethod['amount'] < 0) {
-                return $factory->createErrorMessage((string) __('Cannot place order. Payment method : '.$paymentMethod['title'].' is in use but has an invalid amount.'));
             }
         }
 
         if(!$methodInUse) {
-            return $factory->createErrorMessage((string) __('Cannot place order. You must select one method to use within split payments.'));
+            return $factory->createErrorMessage((string) __('Cannot place order. You must add an amount to one method to use within split payments.'));
         }
 
         if($totalAmount < $this->checkoutSession->getQuote()->getGrandTotal() && !$this->ignoreOutstandingBalance) {
