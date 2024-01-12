@@ -4,7 +4,7 @@
         <?php foreach($magewire->paymentMethods as $code => $paymentMethod): ?>
             <div class="w-full mb-4">
                 <span class="text-black"><?= $paymentMethod['title'] ?></span>
-                <input type="text" class="w-full" id="<?=$code?>.amount" wire:model.defer="paymentMethods.<?=$code?>.amount">
+                <input type="tel" class="w-full" id="<?=$code?>.amount" wire:model.defer="paymentMethods.<?=$code?>.amount">
             </div>
         <?php endforeach; ?>
     </div>
