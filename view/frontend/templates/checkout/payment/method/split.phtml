@@ -2,15 +2,15 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <?php foreach($magewire->paymentMethods as $code => $paymentMethod): ?>
-            <div class="w-full mb-4">
+            <div class="w-full">
                 <span class="text-black"><?= $paymentMethod['title'] ?></span>
-                <input type="tel" class="w-full" id="<?=$code?>.amount" wire:model.defer="paymentMethods.<?=$code?>.amount">
+                <input type="tel" class="w-full form-input" id="<?=$code?>.amount" wire:model.defer="paymentMethods.<?=$code?>.amount">
             </div>
         <?php endforeach; ?>
     </div>
 
     <div class="flex flex-wrap">
-        <button class="btn btn-secondary w-full border-0" wire:click="save">Apply</button>
+        <button class="btn btn-primary btn-secondary w-full" wire:click="save"><?php echo __('Apply'); ?></button>
     </div>
 
     <?php if($magewire->getTotalRemaining(false) > 0): ?>

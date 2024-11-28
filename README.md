@@ -1,4 +1,3 @@
 # Zero1_PosSplitPayments
 
-TODO:
-- [ ] Something
+Module to add split payment support to ZERO-1 OpenPOS
